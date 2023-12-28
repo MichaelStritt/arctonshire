@@ -142,9 +142,9 @@ class _HomePageState extends State<HomePage> {
                 int? userAvatarId = snapshot.data;
                 return userAvatarId != null
                     ? Image.asset(
-                        'assets/avatars/avatar_$userAvatarId.png',
-                        height: 100,
-                        width: 100,
+                        'assets/avatars/avatar_$userAvatarId.webp',
+                        height: 150,
+                        width: 150,
                         fit: BoxFit.cover,
                       )
                     : SizedBox(); // Show an empty SizedBox if no avatar ID is found

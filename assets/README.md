@@ -1,0 +1,1 @@
+All images were generated using Dall-E by OpenAI.

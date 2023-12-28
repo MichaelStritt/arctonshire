@@ -39,7 +39,7 @@ class _AvatarSelectionPageState extends State<AvatarSelectionPage> {
           crossAxisSpacing: 8.0,
           mainAxisSpacing: 8.0,
         ),
-        itemCount: 12, // Replace with your total number of avatars
+        itemCount: 16, // Replace with your total number of avatars
         itemBuilder: (context, index) {
           bool isSelected = index == _currentAvatarId;
           return GestureDetector(
@@ -58,7 +58,7 @@ class _AvatarSelectionPageState extends State<AvatarSelectionPage> {
                   color: Colors.grey[300],
                 ),
                 child: Image.asset(
-                  'assets/avatars/avatar_$index.png',
+                  'assets/avatars/avatar_$index.webp',
                   width: 100,
                   height: 100,
                   fit: BoxFit.contain,
