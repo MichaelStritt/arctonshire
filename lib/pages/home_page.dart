@@ -117,11 +117,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildLoadingWidget() {
-    return Center(
-      child: CircularProgressIndicator(),
-    );
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
   }
-
 
   Widget _buildProfileInfoWidget(String? connectionMessage, String userId, String username, int avatarId, int experience, String packages) {
     return SizedBox(

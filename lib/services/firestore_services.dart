@@ -13,6 +13,25 @@ class FirestoreService {
   }
 
 
+  static Future<Map<String, dynamic>?> getUserData(String userId) async {
+    try {
+      final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+      final userData = await userRef.get();
+
+      if (userData.exists) {
+        return userData.data();
+      } else {
+        // Handle the case where user data doesn't exist
+        return null;
+      }
+    } catch (e) {
+      // Handle any potential errors or exceptions
+      print('Error retrieving user data: $e');
+      return null;
+    }
+  }
+  
+
   static Future<void> updateUsername(String userId, String newUsername) async {
     try {
       final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
