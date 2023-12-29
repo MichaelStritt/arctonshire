@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:arctonshire/services/firestore_services.dart';
 
 class AvatarSelectionPage extends StatefulWidget {
@@ -25,53 +26,72 @@ class _AvatarSelectionPageState extends State<AvatarSelectionPage> {
     setState(() {
       _currentAvatarId = newAvatarId;
     });
-    // Navigate back to the home page after selecting an avatar
     Navigator.pop(context);
+  }
+
+  Future<bool> _checkAvatarExists(String avatarPath) async {
+    try {
+      await rootBundle.load(avatarPath);
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: null, // Remove the app bar
+      appBar: null,
       body: GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4,
           crossAxisSpacing: 8.0,
           mainAxisSpacing: 8.0,
         ),
-        itemCount: 16, // Replace with your total number of avatars
+        itemCount: 120,
         itemBuilder: (context, index) {
           bool isSelected = index == _currentAvatarId;
-          return GestureDetector(
-            onTap: () async {
-              await _updateAvatarId(index);
-              print('Selected avatar: $index');
+          String avatarPath = 'assets/avatars/avatar_$index.webp';
+
+          return FutureBuilder<bool>(
+            future: _checkAvatarExists(avatarPath),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done && snapshot.data == true) {
+                return _buildAvatarTile(avatarPath, isSelected, index);
+              } else {
+                return _buildAvatarTile('assets/avatars/avatar_X.webp', isSelected, index);
+              }
             },
-            child: Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: isSelected ? Colors.blue : Colors.transparent,
-                    width: isSelected ? 2.0 : 0.0,
-                  ),
-                  color: Colors.grey[300],
-                ),
-                child: Image.asset(
-                  'assets/avatars/avatar_$index.webp',
-                  width: 100,
-                  height: 100,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
           );
         },
       ),
     );
   }
+
+  Widget _buildAvatarTile(String imagePath, bool isSelected, int index) {
+    return GestureDetector(
+      onTap: () async {
+        await _updateAvatarId(index);
+        print('Selected avatar: $index');
+      },
+      child: Padding(
+        padding: EdgeInsets.all(8.0),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: isSelected ? Colors.blue : Colors.transparent,
+              width: isSelected ? 2.0 : 0.0,
+            ),
+            color: Colors.grey[300],
+          ),
+          child: Image.asset(
+            imagePath,
+            width: 100,
+            height: 100,
+            fit: BoxFit.contain,
+          ),
+        ),
+      ),
+    );
+  }
 }
-
-
-
-
