@@ -138,5 +138,34 @@ class FirestoreService {
       // Handle error accordingly if needed
     }
   }
+
+
+  static Future<bool> checkPackageStatusAtIndex(String userId, int index) async {
+    try {
+      final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+      final userData = await userRef.get();
+
+      if (userData.exists) {
+        // Get the 'packages' field and split it by ","
+        String packagesString = userData.data()?['packages'] ?? '';
+        List<String> packageList = packagesString.split(',');
+
+        // Convert each string in the list to an integer
+        List<int> packageStatuses = packageList.map(int.parse).toList();
+
+        // Check if the index is within the range and if the value is 1
+        if (index >= 0 && index < packageStatuses.length) {
+          int valueAtIndex = packageStatuses[index];
+          return valueAtIndex == 1;
+        } 
+      } 
+    } catch (error) {
+      print('Error in checkPackageStatusAtIndex: $error');
+    }
+    // Return false if user data doesn't exist, index is out of range, or any error occurs
+    return false;
+  }
+
+
 }
 
