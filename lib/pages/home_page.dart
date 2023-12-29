@@ -54,10 +54,15 @@ class _HomePageState extends State<HomePage> {
   }
 
 
-  Widget _googleSignInButton() {
+  Widget _googleSignInButton({
+    double buttonWidth = 250, // Set the button width here
+    double buttonHeight = 50, // Set the button height here
+    double cornerRadius = 10, // Set the corner radius here
+  }) {
     return Center(
       child: SizedBox(
-        height: 50,
+        width: buttonWidth, // Set the button width
+        height: buttonHeight, // Set the button height
         child: SignInButton(
           Buttons.google,
           text: "Sign in with Google",
@@ -66,6 +71,9 @@ class _HomePageState extends State<HomePage> {
               _handleGoogleSignIn();
             }
           },
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(cornerRadius), // Set the corner radius
+          ),
         ),
       ),
     );
@@ -119,6 +127,11 @@ class _HomePageState extends State<HomePage> {
 
 
   Widget _buildStartPageWidget(String userId, int avatarId) {
+    const double buttonWidth = 250; // Set your preferred button width here
+    const double buttonHeight = 50; // Set the button height here
+    const double buttonPadding = 10; // Set the vertical padding between buttons here
+    const double fontSize = 20; // Set your preferred font size here
+
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       child: Stack(
@@ -134,24 +147,69 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        // Handle "New Game" button click
-                      },
-                      child: const Text('New Game'),
+                    SizedBox(
+                      width: buttonWidth,
+                      height: buttonHeight, // Set the button height
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Handle "New Game" button click
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white, // Set the button background color to white
+                          textStyle: const TextStyle(
+                            fontWeight: FontWeight.bold, // Make the font bold
+                            fontSize: fontSize, // Set the font size
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10), // Adjust the corner radius here
+                          ),
+                        ),
+                        child: const Text('New Game'),
+                      ),
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        // Handle "..." button click
-                      },
-                      child: const Text('...'),
+                    const SizedBox(height: buttonPadding), // Add vertical padding between buttons
+                    SizedBox(
+                      width: buttonWidth,
+                      height: buttonHeight, // Set the button height
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Handle "..." button click
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white, // Set the button background color to white
+                          textStyle: const TextStyle(
+                            fontWeight: FontWeight.bold, // Make the font bold
+                            fontSize: fontSize, // Set the font size
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10), // Adjust the corner radius here
+                          ),
+                        ),
+                        child: const Text('...'),
+                      ),
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        // Handle "About" button click
-                      },
-                      child: const Text('About'),
+                    const SizedBox(height: buttonPadding), // Add vertical padding between buttons
+                    SizedBox(
+                      width: buttonWidth,
+                      height: buttonHeight, // Set the button height
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Handle "About" button click
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white, // Set the button background color to white
+                          textStyle: const TextStyle(
+                            fontWeight: FontWeight.bold, // Make the font bold
+                            fontSize: fontSize, // Set the font size
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10), // Adjust the corner radius here
+                          ),
+                        ),
+                        child: const Text('About'),
+                      ),
                     ),
+                    const SizedBox(height: buttonPadding), // Add vertical padding between buttons
                   ],
                 ),
               ),
@@ -197,33 +255,27 @@ class _HomePageState extends State<HomePage> {
   }
 
 
-  Widget _buildIncreaseButton(String userId) {
-    return ElevatedButton(
-      onPressed: () async {
-        // Update the Firestore data
-        await FirestoreService.increaseExperience(userId, 1);
-      },
-      child: const Text("+EXP"),
-    );
-  }
-
-
-  Widget _buildDecreaseButton(String userId) {
-    return ElevatedButton(
-      onPressed: () async {
-        // Update the Firestore data
-        await FirestoreService.decreaseExperience(userId, 1);
-      },
-      child: const Text("-EXP"),
-    );
-  }
-
-
   Widget _buildSignOutButton() {
-    return MaterialButton(
-      color: Colors.red,
-      onPressed: _handleGoogleSignOut,
-      child: const Text("Sign out"),
+    const double buttonWidth = 250; // Set the button width here
+    const double buttonHeight = 50; // Set the button height here
+
+    return SizedBox(
+      width: buttonWidth,
+      height: buttonHeight, // Set the button height
+      child: MaterialButton(
+        color: Colors.red,
+        onPressed: _handleGoogleSignOut,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10), // Adjust the corner radius here
+        ),
+        child: const Text(
+          "Sign out",
+          style: TextStyle(
+            fontWeight: FontWeight.bold, // Make the font bold
+            fontSize: 20, // Adjust the font size here
+          ),
+        ),
+      ),
     );
   }
 
