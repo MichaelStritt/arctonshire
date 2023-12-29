@@ -45,9 +45,8 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Remove the appBar parameter
       body: _user != null
-          ? _userInfo()
+          ? _buildStartPage()
           : _showSignInButton // Check if the sign-in button should be visible
               ? _googleSignInButton()
               : const Center(child: CircularProgressIndicator()), // Display loading indicator instead of sign-in button
@@ -80,41 +79,6 @@ class _HomePageState extends State<HomePage> {
     await _googleSignIn.signOut();
   }
 
-  Widget _userInfo() {
-    return StreamBuilder<DocumentSnapshot>(
-      stream: FirebaseFirestore.instance.collection('users').doc(_user!.uid).snapshots(),
-      builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingWidget(); // Display loading indicator
-        }
-
-        // Initialize connection message
-        String connectionMessage = '';
-
-        // Initialize the user data
-        Map<String, dynamic>? userData;
-
-        // Check if there were some errors
-        if (snapshot.hasError) {
-          connectionMessage = 'Error: ${snapshot.error}';
-        } else if (!snapshot.hasData || !snapshot.data!.exists) {
-          connectionMessage = 'No data available';
-        } else {
-          // Access user data from the snapshot
-          userData = snapshot.data!.data() as Map<String, dynamic>;
-        }
-
-        // Get values and define defaults if not available
-        String username = userData?['username'] ?? 'Username';
-        int avatarId = userData?['avatarId'] ?? 0;
-        int experience = userData?['experience'] ?? 0;
-        String packages = userData?['packages'] ?? List.filled(100, '0').join(',');
-
-        // Build the actual widget
-        return _buildProfileInfoWidget(connectionMessage, _user!.uid, username, avatarId, experience, packages);
-      },
-    );
-  }
 
   Widget _buildLoadingWidget() {
       return const Center(
@@ -122,69 +86,111 @@ class _HomePageState extends State<HomePage> {
       );
   }
 
-  Widget _buildProfileInfoWidget(String? connectionMessage, String userId, String username, int avatarId, int experience, String packages) {
+
+  Widget _buildStartPage() {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance.collection('users').doc(_user!.uid).snapshots(),
+      builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return _buildLoadingWidget(); // Display loading indicator
+        }
+
+        // Initialize the user data
+        Map<String, dynamic>? userData;
+
+        // Check if there were some errors
+        if (snapshot.hasError) {
+          print('Error: ${snapshot.error}');
+        } else if (!snapshot.hasData || !snapshot.data!.exists) {
+          print('No data available...');
+        } else {
+          // Access user data from the snapshot
+          userData = snapshot.data!.data() as Map<String, dynamic>;
+        }
+
+        // Get values and define defaults if not available
+        int avatarId = userData?['avatarId'] ?? 0;
+
+        // Build the clickable avatar
+        return _buildStartPageWidget(_user!.uid, avatarId);
+      },
+    );
+  }
+
+
+  Widget _buildStartPageWidget(String userId, int avatarId) {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
+      child: Stack(
         children: [
-          // Display the user's avatar based on the avatar ID
-          FutureBuilder<int?>(
-            future: FirestoreService.getAvatarId(userId),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator(); // Show a loading indicator while fetching data
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}'); // Show error if data retrieval fails
-              } else {
-                int? userAvatarId = snapshot.data;
-                return userAvatarId != null
-                    ? Image.asset(
-                        'assets/avatars/avatar_$userAvatarId.webp',
-                        height: 150,
-                        width: 150,
-                        fit: BoxFit.cover,
-                      )
-                    : SizedBox(); // Show an empty SizedBox if no avatar ID is found
-              }
-            },
-          ),
-          // Display the user's email address if _user is not null
-          Text(_user?.email ?? ""),
-          // Display the user's display name (if available) if _user is not null
-          Text(_user?.displayName ?? ""),
-          // Display information if something went wrong
-          // if (connectionMessage != null) Text('Database connection: $connectionMessage'),
-          // Display username, avatarId, and experience from Firestore
-          Text('Username: $username'),
-          Text('Avatar ID: $avatarId'),
-          Text('Experience: $experience'),
-
-          // Display the packages string
-          Text('Packages: $packages'),
-
-          // Add a button to change avatar
-          ElevatedButton(
-            onPressed: () {
-              var navigationProvider = Provider.of<NavigationProvider>(context, listen: false);
-              navigationProvider.openAvatarSelection(context);
-            },
-            child: const Text('Change Avatar'),
-          ),
-
-          // Add buttons to increase and decrease experience
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          // Buttons and other content
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center, // Center the buttons vertically
+            crossAxisAlignment: CrossAxisAlignment.center, // Center the buttons horizontally
+            mainAxisSize: MainAxisSize.max,
             children: [
-              _buildDecreaseButton(userId),
-              const SizedBox(width: 20), // Add some spacing between the buttons
-              _buildIncreaseButton(userId),
+              // Add the three centered buttons here
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        // Handle "New Game" button click
+                      },
+                      child: const Text('New Game'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Handle "..." button click
+                      },
+                      child: const Text('...'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Handle "About" button click
+                      },
+                      child: const Text('About'),
+                    ),
+                  ],
+                ),
+              ),
+
+              _buildSignOutButton(), // Display sign-out button
             ],
           ),
-
-          _buildSignOutButton(), // Display sign-out button
+          
+          // Positioned avatar image at the top right corner
+          Positioned(
+            top: 0,
+            right: 0,
+            child: GestureDetector(
+              onTap: () {
+                var navigationProvider = Provider.of<NavigationProvider>(context, listen: false);
+                navigationProvider.openUserProfile(context); // Navigate to UserProfilePage
+              },
+              child: FutureBuilder<int?>(
+                future: FirestoreService.getAvatarId(userId),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else {
+                    int? userAvatarId = snapshot.data;
+                    return userAvatarId != null
+                        ? Image.asset(
+                            'assets/avatars/avatar_$userAvatarId.webp',
+                            height: 150,
+                            width: 150,
+                            fit: BoxFit.cover,
+                          )
+                        : const SizedBox();
+                  }
+                },
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -253,6 +259,9 @@ class _HomePageState extends State<HomePage> {
 
         // Set the userId for the navigation provider
         Provider.of<NavigationProvider>(context, listen: false).setUserId(userId);
+
+        // Set the context for the navigation provider
+        Provider.of<NavigationProvider>(context, listen: false).setContext(context);
 
         if (!docSnapshot.exists) {
           // Document doesn't exist, create it with initial data

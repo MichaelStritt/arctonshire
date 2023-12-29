@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:arctonshire/pages/avatar_selection.dart';
+import 'package:arctonshire/pages/user_profile.dart';
 
 class NavigationProvider extends ChangeNotifier {
   late BuildContext context;
-  String? _userId; // Add a private userId variable
+  String? _userId;
 
-  // Getter for userId
   String? get userId => _userId;
 
-  // Setter for userId
   void setUserId(String userId) {
     _userId = userId;
-    notifyListeners(); // Notify listeners about the change
+    notifyListeners();
   }
 
   void setContext(BuildContext context) {
@@ -19,12 +18,21 @@ class NavigationProvider extends ChangeNotifier {
   }
 
   void openAvatarSelection(BuildContext context) async {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => AvatarSelectionPage(),
-        ),
-      );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AvatarSelectionPage(),
+      ),
+    );
+  }
+
+  void openUserProfile(BuildContext context) async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserProfilePage(),
+      ),
+    );
   }
 
   void goBackToHomePage() {

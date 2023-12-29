@@ -28,6 +28,9 @@ class UserProfilePageState extends State<UserProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Access userId here
+    String? userId = Provider.of<NavigationProvider>(context, listen: false).userId;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -62,11 +65,33 @@ class UserProfilePageState extends State<UserProfilePage> {
                     Text('Avatar ID: $avatarId'),
                     Text('Experience: $experience'),
                     Text('Packages: $packages'),
+                    // Add the "Change Avatar" button
+                    ElevatedButton(
+                      onPressed: () {
+                        var navigationProvider = Provider.of<NavigationProvider>(context, listen: false);
+                        navigationProvider.openAvatarSelection(context);
+                      },
+                      child: const Text('Change Avatar'),
+                    ),
                     // Add more widgets as needed to display user data
                   ],
                 ),
               );
             },
+          ),
+          // Add a row for Increase and Decrease buttons
+          Positioned(
+            bottom: 16, // Adjust the position as needed
+            left: 16, // Adjust the position as needed
+            right: 16, // Adjust the position as needed
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildDecreaseButton(userId!), // Use the null-aware operator to assert non-null
+                const SizedBox(width: 20), // Add some spacing between the buttons
+                _buildIncreaseButton(userId!), // Use the null-aware operator to assert non-null
+              ],
+            ),
           ),
           // Close button
           Positioned(
@@ -83,5 +108,27 @@ class UserProfilePageState extends State<UserProfilePage> {
       ),
     );
   }
+
+  Widget _buildIncreaseButton(String userId) {
+    return ElevatedButton(
+      onPressed: () async {
+        // Update the Firestore data
+        await FirestoreService.increaseExperience(userId, 1);
+      },
+      child: const Text("+EXP"),
+    );
+  }
+
+
+  Widget _buildDecreaseButton(String userId) {
+    return ElevatedButton(
+      onPressed: () async {
+        // Update the Firestore data
+        await FirestoreService.decreaseExperience(userId, 1);
+      },
+      child: const Text("-EXP"),
+    );
+  }
+
 }
 
