@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirestoreService {
-  static Future<void> saveUserData(String userId, String username, int avatarId, int experience) async {
+  static Future<void> saveUserData(String userId, String username, int avatarId, int experience, String packages) async {
     final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
 
     await userRef.set({
       'username': username,
       'avatarId': avatarId,
       'experience': experience,
+      'packages': packages,
     });
   }
 

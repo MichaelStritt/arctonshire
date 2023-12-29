@@ -108,9 +108,10 @@ class _HomePageState extends State<HomePage> {
         String username = userData?['username'] ?? 'Username';
         int avatarId = userData?['avatarId'] ?? 0;
         int experience = userData?['experience'] ?? 0;
+        String packages = userData?['packages'] ?? List.filled(100, '0').join(',');
 
         // Build the actual widget
-        return _buildProfileInfoWidget(connectionMessage, _user!.uid, username, avatarId, experience);
+        return _buildProfileInfoWidget(connectionMessage, _user!.uid, username, avatarId, experience, packages);
       },
     );
   }
@@ -122,7 +123,7 @@ class _HomePageState extends State<HomePage> {
   }
 
 
-  Widget _buildProfileInfoWidget(String? connectionMessage, String userId, String username, int avatarId, int experience) {
+  Widget _buildProfileInfoWidget(String? connectionMessage, String userId, String username, int avatarId, int experience, String packages) {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       child: Column(
@@ -162,11 +163,14 @@ class _HomePageState extends State<HomePage> {
           Text('Avatar ID: $avatarId'),
           Text('Experience: $experience'),
 
+          // Display the packages string
+          Text('Packages: $packages'),
+
           // Add a button to change avatar
           ElevatedButton(
             onPressed: () {
               var navigationProvider = Provider.of<NavigationProvider>(context, listen: false);
-              navigationProvider.openAvatarSelection(context, userId);
+              navigationProvider.openAvatarSelection(context);
             },
             child: const Text('Change Avatar'),
           ),
@@ -229,8 +233,7 @@ class _HomePageState extends State<HomePage> {
       GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
 
       if (googleSignInAccount != null) {
-        GoogleSignInAuthentication googleAuth =
-            await googleSignInAccount.authentication;
+        GoogleSignInAuthentication googleAuth = await googleSignInAccount.authentication;
 
         AuthCredential credential = GoogleAuthProvider.credential(
           accessToken: googleAuth.accessToken,
@@ -238,12 +241,19 @@ class _HomePageState extends State<HomePage> {
         );
 
         UserCredential userCredential = await _auth.signInWithCredential(credential);
-      
+
         // Retrieve the current user's ID
         String userId = userCredential.user!.uid;
 
+        if (!mounted) return;
+
         // Check if the user's document exists in Firestore
         DocumentSnapshot docSnapshot = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+
+        if (!mounted) return;
+
+        // Set the userId for the navigation provider
+        Provider.of<NavigationProvider>(context, listen: false).setUserId(userId);
 
         if (!docSnapshot.exists) {
           // Document doesn't exist, create it with initial data
@@ -251,22 +261,27 @@ class _HomePageState extends State<HomePage> {
           int avatarId = 0;
           int experience = 0;
 
-          await FirestoreService.saveUserData(userId, username, avatarId, experience);
+          // Generate a string of 100 zeros separated by commas
+          String packages = List.filled(100, '0').join(',');
+
+          await FirestoreService.saveUserData(userId, username, avatarId, experience, packages);
           print('User data created for initial login...');
-          
         } else {
           // Document already exists, no need to create it again
           print('User document already exists...');
-          
         }
+
       }
     } catch (error) {
       print("Error during sign-in: $error");
     } finally {
+      if (!mounted) return;
       setState(() {
         _showSignInButton = true; // Show the sign-in button again after sign-in attempt
       });
     }
   }
+
+
 
 }
