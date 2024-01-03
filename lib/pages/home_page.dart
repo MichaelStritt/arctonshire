@@ -132,8 +132,15 @@ class _HomePageState extends State<HomePage> {
     const double buttonPadding = 10; // Set the vertical padding between buttons here
     const double fontSize = 20; // Set your preferred font size here
 
-    return SizedBox(
+    return Container(
       width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage("assets/interface/homePageBackground.png"),
+          fit: BoxFit.cover,
+        ),
+      ),
       child: Stack(
         children: [
           // Buttons and other content
@@ -217,7 +224,7 @@ class _HomePageState extends State<HomePage> {
               _buildSignOutButton(), // Display sign-out button
             ],
           ),
-          
+
           // Positioned avatar image at the top right corner
           Positioned(
             top: 0,
@@ -237,11 +244,14 @@ class _HomePageState extends State<HomePage> {
                   } else {
                     int? userAvatarId = snapshot.data;
                     return userAvatarId != null
-                        ? Image.asset(
-                            'assets/avatars/avatar_$userAvatarId.webp',
-                            height: 150,
-                            width: 150,
-                            fit: BoxFit.cover,
+                        ? Padding(
+                            padding: const EdgeInsets.only(top: 10.0, right: 10.0), // Adjust the padding values as needed
+                            child: Image.asset(
+                              'assets/avatars/avatar_$userAvatarId.webp',
+                              height: 150,
+                              width: 150,
+                              fit: BoxFit.cover,
+                            ),
                           )
                         : const SizedBox();
                   }
