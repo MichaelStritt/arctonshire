@@ -136,6 +136,7 @@ class _HomePageState extends State<HomePage> {
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height,
       decoration: const BoxDecoration(
+        color: Colors.black, // Set the background color to black
         image: DecorationImage(
           image: AssetImage("assets/interface/homePageBackground.png"),
           fit: BoxFit.cover,
@@ -162,16 +163,17 @@ class _HomePageState extends State<HomePage> {
                           // Handle "New Game" button click
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white, // Set the button background color to white
+                          backgroundColor: Colors.grey[900], // Set the button background color to a really dark gray
                           textStyle: const TextStyle(
                             fontWeight: FontWeight.bold, // Make the font bold
                             fontSize: fontSize, // Set the font size
+                            color: Colors.white, // Set the font color to perfect white
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10), // Adjust the corner radius here
                           ),
                         ),
-                        child: const Text('New Game'),
+                        child: const Text('Play'),
                       ),
                     ),
                     const SizedBox(height: buttonPadding), // Add vertical padding between buttons
@@ -180,19 +182,20 @@ class _HomePageState extends State<HomePage> {
                       height: buttonHeight, // Set the button height
                       child: ElevatedButton(
                         onPressed: () {
-                          // Handle "..." button click
+                          // Handle "Adventure" button click
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white, // Set the button background color to white
+                          backgroundColor: Colors.grey[900], // Set the button background color to a really dark gray
                           textStyle: const TextStyle(
                             fontWeight: FontWeight.bold, // Make the font bold
                             fontSize: fontSize, // Set the font size
+                            color: Colors.white, // Set the font color to perfect white
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10), // Adjust the corner radius here
                           ),
                         ),
-                        child: const Text('...'),
+                        child: const Text('Adventure'),
                       ),
                     ),
                     const SizedBox(height: buttonPadding), // Add vertical padding between buttons
@@ -204,10 +207,11 @@ class _HomePageState extends State<HomePage> {
                           // Handle "About" button click
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white, // Set the button background color to white
+                          backgroundColor: Colors.grey[900], // Set the button background color to a really dark gray
                           textStyle: const TextStyle(
                             fontWeight: FontWeight.bold, // Make the font bold
                             fontSize: fontSize, // Set the font size
+                            color: Colors.white, // Set the font color to perfect white
                           ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10), // Adjust the corner radius here
@@ -245,12 +249,23 @@ class _HomePageState extends State<HomePage> {
                     int? userAvatarId = snapshot.data;
                     return userAvatarId != null
                         ? Padding(
-                            padding: const EdgeInsets.only(top: 10.0, right: 10.0), // Adjust the padding values as needed
-                            child: Image.asset(
-                              'assets/avatars/avatar_$userAvatarId.webp',
-                              height: 150,
-                              width: 150,
-                              fit: BoxFit.cover,
+                            padding: const EdgeInsets.only(top: 12.0, right: 12.0),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: <Widget>[
+                                Image.asset(
+                                  'assets/avatars/avatar_$userAvatarId.webp',
+                                  height: 140,
+                                  width: 140,
+                                  fit: BoxFit.cover,
+                                ),
+                                Image.asset(
+                                  'assets/interface/avatarFrame.png',
+                                  height: 160,
+                                  width: 160,
+                                  fit: BoxFit.cover,
+                                ),
+                              ],
                             ),
                           )
                         : const SizedBox();
