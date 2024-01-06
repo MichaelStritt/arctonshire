@@ -43,17 +43,10 @@ class UserProfilePage extends StatelessWidget {
                   },
                   child: const Text('Change Avatar'),
                 ),
-              ],
-            ),
-          ),
-
-          Positioned(
-            bottom: 16,
-            left: 16,
-            right: 16,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+                ElevatedButton(
+                  onPressed: () => _changeUsername(context, navigationProvider),
+                  child: const Text('Change Username'),
+                ),
                 _buildDecreaseButton(userId),
                 const SizedBox(width: 20),
                 _buildIncreaseButton(userId),
@@ -72,10 +65,55 @@ class UserProfilePage extends StatelessWidget {
               },
             ),
           ),
+          
         ],
       ),
     );
   }
+
+  Future<void> _changeUsername(BuildContext context, NavigationProvider navigationProvider) async {
+    String? newUsername = await _showEditUsernameDialog(context, navigationProvider.username);
+
+    if (newUsername != null && newUsername.isNotEmpty) {
+      // Update Firestore
+      await FirestoreService.updateUsername(navigationProvider.userId!, newUsername);
+      // Update NavigationProvider
+      navigationProvider.setUsername(newUsername);
+    }
+  }
+
+  Future<String?> _showEditUsernameDialog(BuildContext context, String? currentUsername) async {
+    String? newUsername;
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Edit Username'),
+          content: TextField(
+            onChanged: (value) {
+              newUsername = value;
+            },
+            decoration: InputDecoration(hintText: currentUsername ?? 'Enter new username'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Save'),
+              onPressed: () {
+                Navigator.of(context).pop(newUsername);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
   Widget _buildIncreaseButton(String userId) {
     return ElevatedButton(

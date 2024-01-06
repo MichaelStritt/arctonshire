@@ -284,7 +284,7 @@ class _HomePageState extends State<HomePage> {
         Map<String, dynamic>? userData = await FirestoreService.getUserData(userId);
 
         // Check if user data exists, otherwise set default values
-        String username = userData?['username'] ?? 'Default Username'; // Default value if not set
+        String username = userData?['username'] ?? 'Bear Cub'; // Default value if not set
         int avatarId = userData?['avatarId'] ?? 0; // Default value if not set
         int experience = userData?['experience'] ?? 0; // Default value if not set
 
