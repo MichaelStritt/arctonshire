@@ -259,7 +259,6 @@ class _HomePageState extends State<HomePage> {
     });
 
     try {
-      // Attempt to sign in with Google
       GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
 
       if (googleSignInAccount != null) {
@@ -271,37 +270,35 @@ class _HomePageState extends State<HomePage> {
         );
 
         UserCredential userCredential = await _auth.signInWithCredential(credential);
-
-        // Retrieve the current user's ID
         String userId = userCredential.user!.uid;
 
         if (!mounted) return;
 
-        // Capture NavigationProvider before async gap
         final NavigationProvider navigationProvider = Provider.of<NavigationProvider>(context, listen: false);
-
-        // Fetch user data from Firestore
         Map<String, dynamic>? userData = await FirestoreService.getUserData(userId);
 
-        // Check if user data exists, otherwise set default values
-        String username = userData?['username'] ?? 'Bear Cub'; // Default value if not set
-        int avatarId = userData?['avatarId'] ?? 0; // Default value if not set
-        int experience = userData?['experience'] ?? 0; // Default value if not set
-
-        // Set the userId, avatarId, and experience using the captured NavigationProvider
-        navigationProvider.setUserId(userId);
-        navigationProvider.setUsername(username);
-        navigationProvider.setAvatarId(avatarId);
-        navigationProvider.setExperience(experience);
-        
         if (userData == null) {
-          // User data doesn't exist, create it with default values
+          // New user, generate a unique username
+          String uniqueUsername = await FirestoreService.findUniqueUsername();
+          int avatarId = 0; // Default avatar ID for new users
+          int experience = 0; // Default experience for new users
           String packages = List.filled(100, '0').join(',');
 
-          await FirestoreService.saveUserData(userId, username, avatarId, experience, packages);
+          // Save new user data
+          await FirestoreService.saveUserData(userId, uniqueUsername, avatarId, experience, packages);
           print('User data created for initial login...');
+
+          // Update NavigationProvider with new user data
+          navigationProvider.setUserId(userId);
+          navigationProvider.setUsername(uniqueUsername);
+          navigationProvider.setAvatarId(avatarId);
+          navigationProvider.setExperience(experience);
         } else {
-          // Document already exists, no need to create it again
+          // Existing user
+          navigationProvider.setUserId(userId);
+          navigationProvider.setUsername(userData['username']);
+          navigationProvider.setAvatarId(userData['avatarId'] ?? 0);
+          navigationProvider.setExperience(userData['experience'] ?? 0);
           print('User document already exists...');
         }
       }
@@ -310,7 +307,7 @@ class _HomePageState extends State<HomePage> {
     } finally {
       if (!mounted) return;
       setState(() {
-        _showSignInButton = true; // Show the sign-in button again after sign-in attempt
+        _showSignInButton = true;
       });
     }
   }

@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirestoreService {
@@ -43,6 +44,69 @@ class FirestoreService {
       print('Error updating username: $error');
       // Handle error accordingly if needed
     }
+  }
+
+
+  static Future<bool> usernameExists(String username) async {
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('username', isEqualTo: username)
+          .limit(1)
+          .get();
+
+      return querySnapshot.docs.isNotEmpty;
+    } catch (error) {
+      print('Error checking username existence: $error');
+      return false;
+    }
+  }
+
+
+  // Name lists
+  static List<String> listFirstNames = ["Bear", "Wolf", "Deer", "Badger", "Eagle", "Owl", "Lion", "Tiger", "Jaguar", "Leopard", "Lynx", "Cheetah", "Fox", "Raccoon", "Squirrel", "Otter", "Beaver", "Hawk", "Falcon", "Vulture", "Sparrow", "Robin", "Pigeon", "Swan", "Heron", "Cormorant", "Pelican", "Albatross", "Osprey", "Condor", "Puma", "Ocelot", "Bobcat", "Lynx", "Cougar", "Caracal", "Civet", "Hyena", "Jackal", "Fennec", "Raccoon", "Skunk", "Coyote", "Red fox", "Gray wolf", "Arctic fox", "Swift deer", "Fawn", "Moose", "Elk", "Caribou", "Bison", "Buffalo", "Antelope", "Gazelle", "Zebra", "Giraffe", "Elephant", "Rhinoceros", "Hippopotamus", "Warthog", "Wildebeest", "Lioness", "Tigress", "Panther", "Leopard", "Lynx", "Cheetah", "Fox", "Squirrel", "Otter", "Beaver", "Hawk", "Falcon", "Vulture", "Sparrow", "Robin", "Pigeon", "Swan", "Heron", "Cormorant", "Pelican", "Albatross", "Osprey", "Condor", "Puma", "Ocelot", "Bobcat", "Lynx", "Cougar", "Caracal", "Civet", "Hyena", "Jackal", "Fennec", "Raccoon", "Skunk", "Coyote"];
+  static List<String> listLastNames = ["Moon", "Creek", "Sun", "Castle", "Day", "Night", "Dawn", "Citadel", "Ocean", "Sky", "Star", "Forest", "Mist", "Temple", "Twilight", "Firefly", "Whisper", "Oracle", "Sorcerer", "Wizard", "Enchantment", "Serenity", "Dreamscape", "Mirage", "Crystal", "Shadow", "Phoenix", "Elara", "Faelan", "Aelin", "Lyndor", "Nymph", "Elysium", "Zephyr", "Labyrinth", "Mystic", "Ethereal", "Illusion", "Celestial", "Alchemy", "Aurora", "Fae", "Sylph", "Wisp", "Glimmer", "Thorn", "Silhouette", "Frost", "Siren", "Noble", "Vortex", "Tempest", "Quasar", "Luna", "Selene", "Nyx", "Nocturne", "Vellichor", "Arcanum", "Solstice", "Crescent", "Sable", "Banshee", "Obelisk", "Phosphor", "Seraph", "Obsidian", "Moonshadow", "Seer", "Pentacle", "Rune", "Mystique", "Enigma", "Shapeshifter", "Verdant", "Stardust", "Sable", "Dragon", "Wyvern", "Unicorn", "Griffin", "Phoenix", "Sorcery", "Whisperwind", "Spellbound", "Ethereal", "Faerie", "Amethyst", "Elusion", "Gossamer", "Nebula", "Pandora", "Elysian", "Spirit", "Vortex", "Oracle", "Sylvan", "Midnight", "Enchantment"];
+
+
+  // Random unique name
+  static String generateUsername() {
+    final random = Random();
+    String firstName = listFirstNames[random.nextInt(listFirstNames.length)];
+    String lastName = listLastNames[random.nextInt(listLastNames.length)];
+    int index = random.nextInt(1000); // Generate a random index
+
+    return '$firstName $lastName $index';
+  }
+
+
+  // Find unique name
+  static Future<String> findUniqueUsername() async {
+    int index = 1;
+    while (true) {
+      String potentialUsername = generateUsername();
+      print('Trying username: $potentialUsername'); // Debug print
+
+      try {
+        bool exists = await FirestoreService.usernameExists(potentialUsername);
+        if (!exists) {
+          print('Found unique username: $potentialUsername'); // Debug print
+          return potentialUsername;
+        }
+      } catch (e) {
+        print('Error checking if username exists: $e');
+        // If there's an error (like the database doesn't exist), you might want to handle it specifically here.
+        // For example, you could break the loop and return a default username or handle the error differently.
+      }
+
+      index++;
+      if (index > 1000) { // Just as a safety measure to avoid an infinite loop
+        print('Warning: Reached 1000 iterations when trying to find a unique username.');
+        break;
+      }
+    }
+
+    // Add a default return statement here
+    return 'Unique Bear Cub';
   }
 
 

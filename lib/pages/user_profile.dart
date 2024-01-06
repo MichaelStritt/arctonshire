@@ -65,7 +65,7 @@ class UserProfilePage extends StatelessWidget {
               },
             ),
           ),
-          
+
         ],
       ),
     );
@@ -74,11 +74,23 @@ class UserProfilePage extends StatelessWidget {
   Future<void> _changeUsername(BuildContext context, NavigationProvider navigationProvider) async {
     String? newUsername = await _showEditUsernameDialog(context, navigationProvider.username);
 
+    // Capture ScaffoldMessengerState before async gap
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     if (newUsername != null && newUsername.isNotEmpty) {
-      // Update Firestore
-      await FirestoreService.updateUsername(navigationProvider.userId!, newUsername);
-      // Update NavigationProvider
-      navigationProvider.setUsername(newUsername);
+      // Check if username already exists
+      bool exists = await FirestoreService.usernameExists(newUsername);
+      if (exists) {
+        // Use the captured ScaffoldMessengerState to show SnackBar
+        scaffoldMessenger.showSnackBar(SnackBar(
+          content: Text("Username '$newUsername' is already taken."),
+        ));
+      } else {
+        // Update Firestore
+        await FirestoreService.updateUsername(navigationProvider.userId!, newUsername);
+        // Update NavigationProvider
+        navigationProvider.setUsername(newUsername);
+      }
     }
   }
 
