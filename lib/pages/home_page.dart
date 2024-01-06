@@ -128,6 +128,7 @@ class _HomePageState extends State<HomePage> {
 
 
   Widget _buildStartPageWidget(String userId, int avatarId) {
+    final navigationProvider = Provider.of<NavigationProvider>(context);
     const double buttonWidth = 250; // Set your preferred button width here
     const double buttonHeight = 50; // Set the button height here
     const double buttonPadding = 10; // Set the vertical padding between buttons here
@@ -136,7 +137,10 @@ class _HomePageState extends State<HomePage> {
     return Stack(
       children: [
         // Use the BackgroundWithAvatar widget here
-        BackgroundWithAvatar(userId),
+        BackgroundWithAvatar(
+          userId,
+          onAvatarTap: () => navigationProvider.openUserProfile(context),
+        ),
         // Buttons and other content
         Column(
           mainAxisAlignment: MainAxisAlignment.center, // Center the buttons vertically

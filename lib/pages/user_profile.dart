@@ -28,7 +28,10 @@ class UserProfilePage extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          BackgroundWithAvatar(userId),
+          BackgroundWithAvatar(
+            navigationProvider.userId!,
+            onAvatarTap: () => navigationProvider.openAvatarSelection(context),
+          ),
 
           Center(
             child: Column(
@@ -37,19 +40,14 @@ class UserProfilePage extends StatelessWidget {
                 Text('Username: $username'),
                 Text('Avatar ID: $avatarId'),
                 Text('Experience: $experience'),
-                ElevatedButton(
-                  onPressed: () {
-                    navigationProvider.openAvatarSelection(context);
-                  },
-                  child: const Text('Change Avatar'),
-                ),
+                // Remove the Change Avatar button here
                 ElevatedButton(
                   onPressed: () => _changeUsername(context, navigationProvider),
                   child: const Text('Change Username'),
                 ),
-                _buildDecreaseButton(userId),
+                _buildDecreaseButton(userId, navigationProvider),
                 const SizedBox(width: 20),
-                _buildIncreaseButton(userId),
+                _buildIncreaseButton(userId, navigationProvider),
               ],
             ),
           ),
@@ -72,10 +70,10 @@ class UserProfilePage extends StatelessWidget {
   }
 
   Future<void> _changeUsername(BuildContext context, NavigationProvider navigationProvider) async {
-    String? newUsername = await _showEditUsernameDialog(context, navigationProvider.username);
-
     // Capture ScaffoldMessengerState before async gap
     final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    String? newUsername = await _showEditUsernameDialog(context, navigationProvider.username);
 
     if (newUsername != null && newUsername.isNotEmpty) {
       // Check if username already exists
@@ -110,7 +108,7 @@ class UserProfilePage extends StatelessWidget {
                 onChanged: (value) {
                   newUsername = value;
                 },
-                decoration: InputDecoration(hintText: 'Enter new username'),
+                decoration: const InputDecoration(hintText: 'Enter new username'),
               ),
               actions: <Widget>[
                 TextButton(
@@ -145,21 +143,32 @@ class UserProfilePage extends StatelessWidget {
 
 
 
-  Widget _buildIncreaseButton(String userId) {
+  Widget _buildIncreaseButton(String userId, NavigationProvider navigationProvider) {
     return ElevatedButton(
       onPressed: () async {
         await FirestoreService.increaseExperience(userId, 1);
+        // Assuming the Firestore function updates the experience correctly,
+        // you should fetch the new experience value and update the provider.
+        int? newExperience = await FirestoreService.getExperience(userId);
+        if (newExperience != null) {
+          navigationProvider.setExperience(newExperience);
+        }
       },
       child: const Text("+EXP"),
     );
   }
 
-  Widget _buildDecreaseButton(String userId) {
+  Widget _buildDecreaseButton(String userId, NavigationProvider navigationProvider) {
     return ElevatedButton(
       onPressed: () async {
         await FirestoreService.decreaseExperience(userId, 1);
+        int? newExperience = await FirestoreService.getExperience(userId);
+        if (newExperience != null) {
+          navigationProvider.setExperience(newExperience);
+        }
       },
       child: const Text("-EXP"),
     );
   }
+
 }

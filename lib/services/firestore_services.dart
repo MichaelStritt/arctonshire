@@ -157,6 +157,21 @@ class FirestoreService {
   }
 
 
+  static Future<int?> getExperience(String userId) async {
+    try {
+      final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+      final userData = await userRef.get();
+
+      if (userData.exists && userData.data()?['experience'] != null) {
+        return userData.data()?['experience'] as int;
+      }
+    } catch (e) {
+      print('Error retrieving experience: $e');
+    }
+    return null; // Return null if there's an error or if the data doesn't exist
+  }
+
+
   static Future<void> increaseExperience(String userId, int increaseBy) async {
     try {
       final userRef = FirebaseFirestore.instance.collection('users').doc(userId);

@@ -9,22 +9,35 @@ class UserLobbyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String? userId = Provider.of<NavigationProvider>(context, listen: false).userId;
+    // Using Provider to access NavigationProvider
+    final navigationProvider = Provider.of<NavigationProvider>(context);
+
+    // Accessing userId, username, avatarId, and experience from NavigationProvider
+    String? userId = navigationProvider.userId;
+
+    if (userId == null) {
+      // Handle the null case, e.g., navigate back or show an error message
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).pop();
+      });
+      return const Scaffold(body: Center(child: Text('User ID not available')));
+    }
 
     return Scaffold(
       body: Stack(
         children: [
-          // Use the BackgroundWithAvatar widget here
-          BackgroundWithAvatar(userId!),
+          BackgroundWithAvatar(
+            userId, // Use the non-null userId here
+            onAvatarTap: () => navigationProvider.openUserProfile(context),
+          ),
           // Close button
           Positioned(
-            top: MediaQuery.of(context).padding.top, // Respect the status bar height
+            top: MediaQuery.of(context).padding.top,
             left: 0,
             child: IconButton(
               icon: const Icon(Icons.close, size: 30.0),
               onPressed: () {
-                Provider.of<NavigationProvider>(context, listen: false)
-                    .goBackToHomePage(context);
+                navigationProvider.goBackToHomePage(context);
               },
             ),
           ),

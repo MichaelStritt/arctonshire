@@ -6,8 +6,9 @@ import 'package:arctonshire/services/firestore_services.dart';
 
 class BackgroundWithAvatar extends StatelessWidget {
   final String userId;
+  final VoidCallback onAvatarTap;
 
-  const BackgroundWithAvatar(this.userId, {super.key});
+  const BackgroundWithAvatar(this.userId, {Key? key, required this.onAvatarTap}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +29,7 @@ class BackgroundWithAvatar extends StatelessWidget {
             top: 0,
             right: 0,
             child: GestureDetector(
-              onTap: () {
-                var navigationProvider = Provider.of<NavigationProvider>(context, listen: false);
-                navigationProvider.openUserProfile(context); // Navigate to UserProfilePage
-              },
+              onTap: onAvatarTap,
               child: FutureBuilder<int?>(
                 future: FirestoreService.getAvatarId(userId),
                 builder: (context, snapshot) {
