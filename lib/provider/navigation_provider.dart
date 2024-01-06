@@ -6,12 +6,33 @@ import 'package:arctonshire/pages/user_lobby.dart';
 class NavigationProvider extends ChangeNotifier {
   late BuildContext context;
   String? _userId;
+  String? _username;
+  int? _avatarId;
+  int? _experience;
 
   String? get userId => _userId;
+  String? get username => _username;
+  int? get avatarId => _avatarId;
+  int? get experience => _experience;
 
   void setUserId(String userId) {
     _userId = userId;
     notifyListeners();
+  }
+
+  void setUsername(String username) {
+    _username = username;
+    notifyListeners();
+  }
+
+  void setAvatarId(int avatarId) {
+      _avatarId = avatarId;
+      notifyListeners();
+  }
+
+  void setExperience(int experience) {
+      _experience = experience;
+      notifyListeners();
   }
 
   void setContext(BuildContext context) {
@@ -45,11 +66,9 @@ class NavigationProvider extends ChangeNotifier {
     );
   }
 
-  void goBackToHomePage() {
-    if (context != null) {
-      Navigator.pop(context);
-    } else {
-      print('Context is not set...');
-    }
+  void goBackToHomePage(BuildContext context) {
+    // Use the passed context for navigation
+    Navigator.of(context).pop();
   }
+  
 }

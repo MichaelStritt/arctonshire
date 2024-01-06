@@ -23,7 +23,8 @@ class UserLobbyPage extends StatelessWidget {
             child: IconButton(
               icon: const Icon(Icons.close, size: 30.0),
               onPressed: () {
-                Provider.of<NavigationProvider>(context, listen: false).goBackToHomePage();
+                Provider.of<NavigationProvider>(context, listen: false)
+                    .goBackToHomePage(context);
               },
             ),
           ),

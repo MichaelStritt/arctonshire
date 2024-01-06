@@ -9,82 +9,66 @@ class UserProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String? userId = Provider.of<NavigationProvider>(context, listen: false).userId;
+    // Using Provider to access NavigationProvider
+    final navigationProvider = Provider.of<NavigationProvider>(context);
+
+    // Accessing userId, username, avatarId, and experience from NavigationProvider
+    String? userId = navigationProvider.userId;
+    String? username = navigationProvider.username;
+    int? avatarId = navigationProvider.avatarId;
+    int? experience = navigationProvider.experience;
+
+    // Ensure userId is not null
+    if (userId == null) {
+      return const Scaffold(
+        body: Center(child: Text('User ID is not available')),
+      );
+    }
 
     return Scaffold(
       body: Stack(
         children: [
-          // Use the BackgroundWithAvatar widget here
-          BackgroundWithAvatar(userId!),
+          BackgroundWithAvatar(userId),
 
-          // Centered content on top of the background
           Center(
-            child: FutureBuilder<Map<String, dynamic>?>(
-              future: FirestoreService.getUserData(userId),
-              builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>?> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                }
-
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
-
-                if (!snapshot.hasData || snapshot.data == null) {
-                  return const Text('No user data available');
-                }
-
-                var userData = snapshot.data!;
-                String username = userData['username'] ?? 'Username';
-                int avatarId = userData['avatarId'] ?? 0;
-                int experience = userData['experience'] ?? 0;
-                //String packages = userData['packages'] ?? List.filled(100, '0').join(',');
-
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('Username: $username'),
-                    Text('Avatar ID: $avatarId'),
-                    Text('Experience: $experience'),
-                    // Text('Packages: $packages'),
-                    // Add the "Change Avatar" button
-                    ElevatedButton(
-                      onPressed: () {
-                        var navigationProvider = Provider.of<NavigationProvider>(context, listen: false);
-                        navigationProvider.openAvatarSelection(context);
-                      },
-                      child: const Text('Change Avatar'),
-                    ),
-                    // Add more widgets as needed to display user data
-                  ],
-                );
-              },
-            ),
-          ),
-
-          // Add a row for Increase and Decrease buttons
-          Positioned(
-            bottom: 16, // Adjust the position as needed
-            left: 16, // Adjust the position as needed
-            right: 16, // Adjust the position as needed
-            child: Row(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildDecreaseButton(userId), // Use the null-aware operator to assert non-null
-                const SizedBox(width: 20), // Add some spacing between the buttons
-                _buildIncreaseButton(userId), // Use the null-aware operator to assert non-null
+                Text('Username: $username'),
+                Text('Avatar ID: $avatarId'),
+                Text('Experience: $experience'),
+                ElevatedButton(
+                  onPressed: () {
+                    navigationProvider.openAvatarSelection(context);
+                  },
+                  child: const Text('Change Avatar'),
+                ),
               ],
             ),
           ),
 
-          // Close button
           Positioned(
-            top: MediaQuery.of(context).padding.top, // Respect the status bar height
+            bottom: 16,
+            left: 16,
+            right: 16,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildDecreaseButton(userId),
+                const SizedBox(width: 20),
+                _buildIncreaseButton(userId),
+              ],
+            ),
+          ),
+
+          Positioned(
+            top: MediaQuery.of(context).padding.top,
             left: 0,
             child: IconButton(
               icon: const Icon(Icons.close, size: 30.0),
               onPressed: () {
-                Provider.of<NavigationProvider>(context, listen: false).goBackToHomePage();
+                Provider.of<NavigationProvider>(context, listen: false)
+                    .goBackToHomePage(context);
               },
             ),
           ),
@@ -96,7 +80,6 @@ class UserProfilePage extends StatelessWidget {
   Widget _buildIncreaseButton(String userId) {
     return ElevatedButton(
       onPressed: () async {
-        // Update the Firestore data
         await FirestoreService.increaseExperience(userId, 1);
       },
       child: const Text("+EXP"),
@@ -106,7 +89,6 @@ class UserProfilePage extends StatelessWidget {
   Widget _buildDecreaseButton(String userId) {
     return ElevatedButton(
       onPressed: () async {
-        // Update the Firestore data
         await FirestoreService.decreaseExperience(userId, 1);
       },
       child: const Text("-EXP"),

@@ -277,24 +277,25 @@ class _HomePageState extends State<HomePage> {
 
         if (!mounted) return;
 
-        // Check if the user's document exists in Firestore
-        DocumentSnapshot docSnapshot = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+        // Capture NavigationProvider before async gap
+        final NavigationProvider navigationProvider = Provider.of<NavigationProvider>(context, listen: false);
 
-        if (!mounted) return;
+        // Fetch user data from Firestore
+        Map<String, dynamic>? userData = await FirestoreService.getUserData(userId);
 
-        // Set the userId for the navigation provider
-        Provider.of<NavigationProvider>(context, listen: false).setUserId(userId);
+        // Check if user data exists, otherwise set default values
+        String username = userData?['username'] ?? 'Default Username'; // Default value if not set
+        int avatarId = userData?['avatarId'] ?? 0; // Default value if not set
+        int experience = userData?['experience'] ?? 0; // Default value if not set
 
-        // Set the context for the navigation provider
-        Provider.of<NavigationProvider>(context, listen: false).setContext(context);
-
-        if (!docSnapshot.exists) {
-          // Document doesn't exist, create it with initial data
-          String username = 'Bear Cub';
-          int avatarId = 0;
-          int experience = 0;
-
-          // Generate a string of 100 zeros separated by commas
+        // Set the userId, avatarId, and experience using the captured NavigationProvider
+        navigationProvider.setUserId(userId);
+        navigationProvider.setUsername(username);
+        navigationProvider.setAvatarId(avatarId);
+        navigationProvider.setExperience(experience);
+        
+        if (userData == null) {
+          // User data doesn't exist, create it with default values
           String packages = List.filled(100, '0').join(',');
 
           await FirestoreService.saveUserData(userId, username, avatarId, experience, packages);
@@ -303,7 +304,6 @@ class _HomePageState extends State<HomePage> {
           // Document already exists, no need to create it again
           print('User document already exists...');
         }
-
       }
     } catch (error) {
       print("Error during sign-in: $error");
