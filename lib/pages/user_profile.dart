@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:arctonshire/classes/app_user.dart';
 import 'package:arctonshire/provider/navigation_provider.dart';
 import 'package:arctonshire/services/firestore_services.dart';
 import 'package:arctonshire/backgrounds/background_with_avatar.dart';
@@ -9,27 +10,24 @@ class UserProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Using Provider to access NavigationProvider
     final navigationProvider = Provider.of<NavigationProvider>(context);
+    AppUser? currentUser = navigationProvider.currentUser;
 
-    // Accessing userId, username, avatarId, and experience from NavigationProvider
-    String? userId = navigationProvider.userId;
-    String? username = navigationProvider.username;
-    int? avatarId = navigationProvider.avatarId;
-    int? experience = navigationProvider.experience;
-
-    // Ensure userId is not null
-    if (userId == null) {
+    // Ensure currentUser is not null
+    if (currentUser == null) {
       return const Scaffold(
-        body: Center(child: Text('User ID is not available')),
+        body: Center(child: Text('User is not available')),
       );
     }
+
+    // Get the userId
+    String userId = currentUser.userId;
 
     return Scaffold(
       body: Stack(
         children: [
           BackgroundWithAvatar(
-            navigationProvider.userId!,
+            currentUser.userId, // Use currentUser's userId
             onAvatarTap: () => navigationProvider.openAvatarSelection(context),
           ),
 
@@ -37,9 +35,9 @@ class UserProfilePage extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Username: $username'),
-                Text('Avatar ID: $avatarId'),
-                Text('Experience: $experience'),
+                Text('Username: ${currentUser.username}'),
+                Text('Avatar ID: ${currentUser.avatarId}'),
+                Text('Experience: ${currentUser.experience}'),
                 // Remove the Change Avatar button here
                 ElevatedButton(
                   onPressed: () => _changeUsername(context, navigationProvider),
@@ -73,7 +71,13 @@ class UserProfilePage extends StatelessWidget {
     // Capture ScaffoldMessengerState before async gap
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
-    String? newUsername = await _showEditUsernameDialog(context, navigationProvider.username);
+    AppUser? currentUser = navigationProvider.currentUser;
+    if (currentUser == null) {
+      print("Error: Current user is null");
+      return;
+    }
+
+    String? newUsername = await _showEditUsernameDialog(context, currentUser.username);
 
     if (newUsername != null && newUsername.isNotEmpty) {
       // Check if username already exists
@@ -85,57 +89,48 @@ class UserProfilePage extends StatelessWidget {
         ));
       } else {
         // Update Firestore
-        await FirestoreService.updateUsername(navigationProvider.userId!, newUsername);
-        // Update NavigationProvider
-        navigationProvider.setUsername(newUsername);
+        await FirestoreService.updateUsername(currentUser.userId, newUsername);
+
+        // Create a new AppUser instance with updated username
+        AppUser updatedUser = currentUser.copyWith(username: newUsername);
+        navigationProvider.setCurrentUser(updatedUser);
       }
     }
   }
 
   Future<String?> _showEditUsernameDialog(BuildContext context, String? currentUsername) async {
-    String? newUsername;
     TextEditingController usernameController = TextEditingController(text: currentUsername);
 
     return showDialog<String>(
       context: context,
       builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('Edit Username'),
-              content: TextField(
-                controller: usernameController,
-                onChanged: (value) {
-                  newUsername = value;
-                },
-                decoration: const InputDecoration(hintText: 'Enter new username'),
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: const Text('Cancel'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                TextButton(
-                  child: const Text('Random'),
-                  onPressed: () async {
-                    String randomUsername = await FirestoreService.findUniqueUsername();
-                    setState(() {
-                      usernameController.text = randomUsername;
-                      newUsername = randomUsername;
-                    });
-                  },
-                ),
-                TextButton(
-                  child: const Text('Save'),
-                  onPressed: () {
-                    Navigator.of(context).pop(newUsername);
-                  },
-                ),
-              ],
-            );
-          },
+        return AlertDialog(
+          title: const Text('Edit Username'),
+          content: TextField(
+            controller: usernameController,
+            decoration: const InputDecoration(hintText: 'Enter new username'),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Random'),
+              onPressed: () async {
+                String randomUsername = await FirestoreService.findUniqueUsername();
+                usernameController.text = randomUsername; // Update the controller directly
+              },
+            ),
+            TextButton(
+              child: const Text('Save'),
+              onPressed: () {
+                Navigator.of(context).pop(usernameController.text); // Use the controller's text directly
+              },
+            ),
+          ],
         );
       },
     );
@@ -146,29 +141,37 @@ class UserProfilePage extends StatelessWidget {
   Widget _buildIncreaseButton(String userId, NavigationProvider navigationProvider) {
     return ElevatedButton(
       onPressed: () async {
-        await FirestoreService.increaseExperience(userId, 1);
-        // Assuming the Firestore function updates the experience correctly,
-        // you should fetch the new experience value and update the provider.
-        int? newExperience = await FirestoreService.getExperience(userId);
-        if (newExperience != null) {
-          navigationProvider.setExperience(newExperience);
+        AppUser? currentUser = navigationProvider.currentUser;
+        if (currentUser != null) {
+          await FirestoreService.increaseExperience(currentUser.userId, 1);
+          int? newExperience = await FirestoreService.getExperience(currentUser.userId);
+          if (newExperience != null) {
+            AppUser updatedUser = currentUser.copyWith(experience: newExperience);
+            navigationProvider.setCurrentUser(updatedUser);
+          }
         }
       },
       child: const Text("+EXP"),
     );
   }
 
+
   Widget _buildDecreaseButton(String userId, NavigationProvider navigationProvider) {
     return ElevatedButton(
       onPressed: () async {
-        await FirestoreService.decreaseExperience(userId, 1);
-        int? newExperience = await FirestoreService.getExperience(userId);
-        if (newExperience != null) {
-          navigationProvider.setExperience(newExperience);
+        AppUser? currentUser = navigationProvider.currentUser;
+        if (currentUser != null) {
+          await FirestoreService.decreaseExperience(currentUser.userId, 1);
+          int? newExperience = await FirestoreService.getExperience(currentUser.userId);
+          if (newExperience != null) {
+            AppUser updatedUser = currentUser.copyWith(experience: newExperience);
+            navigationProvider.setCurrentUser(updatedUser);
+          }
         }
       },
-      child: const Text("-EXP"),
+      child: const Text("+EXP"),
     );
   }
+
 
 }

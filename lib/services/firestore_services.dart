@@ -1,34 +1,26 @@
 import 'dart:math';
+import 'package:arctonshire/classes/app_user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirestoreService {
-  static Future<void> saveUserData(String userId, String username, int avatarId, int experience, String packages, String friends, bool visibility) async {
-    final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+  static Future<void> saveUserData(AppUser user) async {
+    final userRef = FirebaseFirestore.instance.collection('users').doc(user.userId);
 
-    await userRef.set({
-      'username': username,
-      'avatarId': avatarId,
-      'experience': experience,
-      'packages': packages,
-      'friends': friends,
-      'visibility': visibility,
-    });
+    await userRef.set(user.toFirestore());
   }
 
 
-  static Future<Map<String, dynamic>?> getUserData(String userId) async {
+  static Future<AppUser?> getUserData(String userId) async {
     try {
       final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
       final userData = await userRef.get();
 
       if (userData.exists) {
-        return userData.data();
+        return AppUser.fromFirestore(userData.data() as Map<String, dynamic>);
       } else {
-        // Handle the case where user data doesn't exist
         return null;
       }
     } catch (e) {
-      // Handle any potential errors or exceptions
       print('Error retrieving user data: $e');
       return null;
     }
@@ -109,6 +101,41 @@ class FirestoreService {
 
     // Add a default return statement here
     return 'Unique Bear Cub';
+  }
+
+
+  static Future<List<AppUser>> getAllVisibleUsers() async {
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('visibility', isEqualTo: true)
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => AppUser.fromFirestore(doc.data() as Map<String, dynamic>))
+          .toList();
+    } catch (error) {
+      print('Error fetching visible users: $error');
+      return [];
+    }
+  }
+
+
+  static Future<List<String>> getFriendsList(String userId) async {
+    try {
+      final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+      final userData = await userRef.get();
+
+      if (userData.exists) {
+        String friends = userData.data()?['friends'] ?? '';
+        return friends.split(',');
+      } else {
+        return [];
+      }
+    } catch (error) {
+      print('Error fetching friends list: $error');
+      return [];
+    }
   }
 
 

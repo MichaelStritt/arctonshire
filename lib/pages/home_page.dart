@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:arctonshire/classes/app_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sign_in_button/sign_in_button.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -33,13 +34,36 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // Listening to changes in the authentication state
-    // When the authentication state changes, update the _user variable
-    _auth.authStateChanges().listen((User? event) {
+    _auth.authStateChanges().listen((User? user) {
       setState(() {
-        _user = event; // Update _user with the new authentication state
+        _user = user;
       });
+
+      if (_user != null) {
+        // Fetch user data from Firestore when user state changes
+        _fetchAndSetCurrentUser();
+      } else {
+        // Handle user sign-out scenario
+        Provider.of<NavigationProvider>(context, listen: false).resetCurrentUser();
+      }
     });
+  }
+
+  
+  Future<void> _fetchAndSetCurrentUser() async {
+    final userId = _user!.uid;
+    final userData = await FirestoreService.getUserData(userId);
+
+    // Check if the widget is still in the widget tree
+    if (!mounted) return;
+
+    if (userData != null) {
+      // Create an AppUser instance from userData
+      final currentUser = AppUser.fromFirestore(userData as Map<String, dynamic>);
+
+      // Update NavigationProvider with the current user
+      Provider.of<NavigationProvider>(context, listen: false).setCurrentUser(currentUser);
+    }
   }
 
   
@@ -301,42 +325,36 @@ class _HomePageState extends State<HomePage> {
         if (!mounted) return;
 
         final NavigationProvider navigationProvider = Provider.of<NavigationProvider>(context, listen: false);
-        Map<String, dynamic>? userData = await FirestoreService.getUserData(userId);
+        AppUser? userData = await FirestoreService.getUserData(userId);
 
         if (userData == null) {
           // New user, generate a unique username
           String uniqueUsername = await FirestoreService.findUniqueUsername();
-          int avatarId = 0; // Default avatar ID for new users
-          int experience = 0; // Default experience for new users
-          String packages = List.filled(100, '0').join(',');
-          String friends = '';
-          bool visibility = false;
+
+          // Create AppUser instance for new user
+          AppUser newUser = AppUser(
+            userId: userId,
+            username: uniqueUsername,
+            avatarId: 0,
+            experience: 0,
+            packages: List.filled(100, '0').join(','),
+            friends: '',
+            visibility: false,
+          );
 
           // Save new user data
-          await FirestoreService.saveUserData(userId, uniqueUsername, avatarId, experience, packages, friends, visibility);
+          await FirestoreService.saveUserData(newUser);
           print('User data created for initial login...');
 
-          // Update NavigationProvider with new user data
-          navigationProvider.setUserId(userId);
-          navigationProvider.setUsername(uniqueUsername);
-          navigationProvider.setAvatarId(avatarId);
-          navigationProvider.setExperience(experience);
-          navigationProvider.setPackages(packages);
-          navigationProvider.setFriends(friends);
-          navigationProvider.setVisibility(visibility);
+          // Update NavigationProvider with new user
+          navigationProvider.setCurrentUser(newUser);
         } else {
-          // Existing user
-          navigationProvider.setUserId(userId);
-          navigationProvider.setUsername(userData['username']);
-          navigationProvider.setAvatarId(userData['avatarId'] ?? 0);
-          navigationProvider.setExperience(userData['experience'] ?? 0);
-          navigationProvider.setPackages(userData['packages'] ?? List.filled(100, '0').join(','));
-          navigationProvider.setFriends(userData['friends'] ?? 0);
-          navigationProvider.setVisibility(userData['visibility'] ?? 0);
+          // Existing user, use userData directly
+          navigationProvider.setCurrentUser(userData);
 
           print('User document already exists...');
         }
-      }
+    } 
     } catch (error) {
       print("Error during sign-in: $error");
     } finally {
@@ -346,5 +364,6 @@ class _HomePageState extends State<HomePage> {
       });
     }
   }
+
 
 }

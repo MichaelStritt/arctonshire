@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:arctonshire/classes/app_user.dart';
 import 'package:arctonshire/services/firestore_services.dart';
 import 'package:provider/provider.dart';
 import 'package:arctonshire/provider/navigation_provider.dart';
@@ -17,34 +18,32 @@ class AvatarSelectionPageState extends State<AvatarSelectionPage> {
   @override
   void initState() {
     super.initState();
-    String? userId = Provider.of<NavigationProvider>(context, listen: false).userId;
+    final navigationProvider = Provider.of<NavigationProvider>(context, listen: false);
+    AppUser? currentUser = navigationProvider.currentUser;
 
-    if (userId != null) {
-      _selectedAvatarIdFuture = FirestoreService.getAvatarId(userId);
+    if (currentUser != null) {
+      _selectedAvatarIdFuture = FirestoreService.getAvatarId(currentUser.userId);
     } else {
-      // Handle the case when userId is null.
-      print("Error: userId is null");
+      print("Error: currentUser is null");
     }
   }
 
   Future<void> _updateAvatarId(int newAvatarId) async {
-    // Capture the NavigationProvider reference before the async operation
     final navigationProvider = Provider.of<NavigationProvider>(context, listen: false);
-
-    // Retrieve the userId from the captured NavigationProvider
-    String? userId = navigationProvider.userId;
+    AppUser? currentUser = navigationProvider.currentUser;
     
-    if (userId != null) {
-      await FirestoreService.updateAvatarId(userId, newAvatarId);
+    if (currentUser != null) {
+      await FirestoreService.updateAvatarId(currentUser.userId, newAvatarId);
 
-      // Update the avatar ID in the captured NavigationProvider
-      navigationProvider.setAvatarId(newAvatarId);
+      // Update the avatar ID in the currentUser object and update NavigationProvider
+      AppUser updatedUser = currentUser.copyWith(avatarId: newAvatarId);
+      navigationProvider.setCurrentUser(updatedUser);
 
       if (mounted) {
         Navigator.pop(context);
       }
     } else {
-      print("Error: userId is null");
+      print("Error: currentUser is null");
     }
   }
 

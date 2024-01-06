@@ -1,59 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:arctonshire/classes/app_user.dart';
 import 'package:arctonshire/pages/avatar_selection.dart';
 import 'package:arctonshire/pages/user_profile.dart';
 import 'package:arctonshire/pages/user_lobby.dart';
 
 class NavigationProvider extends ChangeNotifier {
   late BuildContext context;
-  String? _userId;
-  String? _username;
-  int? _avatarId;
-  int? _experience;
-  String? _packages;
-  String? _friends;
-  bool? _visibility;
+  AppUser? _currentUser;
+  AppUser? get currentUser => _currentUser;
 
-  String? get userId => _userId;
-  String? get username => _username;
-  int? get avatarId => _avatarId;
-  int? get experience => _experience;
-  String? get packages => _packages;
-  String? get friends => _friends;
-  bool? get visibility => _visibility;
-
-  void setUserId(String userId) {
-    _userId = userId;
+  void setCurrentUser(AppUser user) {
+    _currentUser = user;
     notifyListeners();
   }
 
-  void setUsername(String username) {
-    _username = username;
+  void resetCurrentUser() {
+    _currentUser = null;
     notifyListeners();
-  }
-
-  void setAvatarId(int avatarId) {
-      _avatarId = avatarId;
-      notifyListeners();
-  }
-
-  void setExperience(int experience) {
-      _experience = experience;
-      notifyListeners();
-  }
-
-  void setPackages(String packages) {
-      _packages = packages;
-      notifyListeners();
-  }
-
-  void setFriends(String friends) {
-      _friends = friends;
-      notifyListeners();
-  }
-
-  void setVisibility(bool visibility) {
-      _visibility = visibility;
-      notifyListeners();
   }
 
   void setContext(BuildContext context) {
@@ -82,14 +45,12 @@ class NavigationProvider extends ChangeNotifier {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => UserLobbyPage(),
+        builder: (context) => UserLobby(),
       ),
     );
   }
 
   void goBackToHomePage(BuildContext context) {
-    // Use the passed context for navigation
     Navigator.of(context).pop();
   }
-  
 }
