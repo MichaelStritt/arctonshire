@@ -9,11 +9,17 @@ class NavigationProvider extends ChangeNotifier {
   String? _username;
   int? _avatarId;
   int? _experience;
+  String? _packages;
+  String? _friends;
+  bool? _visibility;
 
   String? get userId => _userId;
   String? get username => _username;
   int? get avatarId => _avatarId;
   int? get experience => _experience;
+  String? get packages => _packages;
+  String? get friends => _friends;
+  bool? get visibility => _visibility;
 
   void setUserId(String userId) {
     _userId = userId;
@@ -32,6 +38,21 @@ class NavigationProvider extends ChangeNotifier {
 
   void setExperience(int experience) {
       _experience = experience;
+      notifyListeners();
+  }
+
+  void setPackages(String packages) {
+      _packages = packages;
+      notifyListeners();
+  }
+
+  void setFriends(String friends) {
+      _friends = friends;
+      notifyListeners();
+  }
+
+  void setVisibility(bool visibility) {
+      _visibility = visibility;
       notifyListeners();
   }
 

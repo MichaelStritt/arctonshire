@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirestoreService {
-  static Future<void> saveUserData(String userId, String username, int avatarId, int experience, String packages) async {
+  static Future<void> saveUserData(String userId, String username, int avatarId, int experience, String packages, String friends, bool visibility) async {
     final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
 
     await userRef.set({
@@ -10,6 +10,8 @@ class FirestoreService {
       'avatarId': avatarId,
       'experience': experience,
       'packages': packages,
+      'friends': friends,
+      'visibility': visibility,
     });
   }
 

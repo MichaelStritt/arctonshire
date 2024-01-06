@@ -202,7 +202,29 @@ class _HomePageState extends State<HomePage> {
                     height: buttonHeight, // Set the button height
                     child: ElevatedButton(
                       onPressed: () {
-                        // Handle "About" button click
+                        // Handle "Shop" button click, in the shop we will set the packages based on if a user bought a package or not
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[900], // Set the button background color to a really dark gray
+                        textStyle: const TextStyle(
+                          fontWeight: FontWeight.bold, // Make the font bold
+                          fontSize: fontSize, // Set the font size
+                          color: Colors.white, // Set the font color to perfect white
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10), // Adjust the corner radius here
+                        ),
+                      ),
+                      child: const Text('Shop'),
+                    ),
+                  ),
+                  const SizedBox(height: buttonPadding), // Add vertical padding between buttons
+                  SizedBox(
+                    width: buttonWidth,
+                    height: buttonHeight, // Set the button height
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Handle "About" button click, in the about section we will display legal information and so on
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey[900], // Set the button background color to a really dark gray
@@ -287,9 +309,11 @@ class _HomePageState extends State<HomePage> {
           int avatarId = 0; // Default avatar ID for new users
           int experience = 0; // Default experience for new users
           String packages = List.filled(100, '0').join(',');
+          String friends = '';
+          bool visibility = false;
 
           // Save new user data
-          await FirestoreService.saveUserData(userId, uniqueUsername, avatarId, experience, packages);
+          await FirestoreService.saveUserData(userId, uniqueUsername, avatarId, experience, packages, friends, visibility);
           print('User data created for initial login...');
 
           // Update NavigationProvider with new user data
@@ -297,12 +321,19 @@ class _HomePageState extends State<HomePage> {
           navigationProvider.setUsername(uniqueUsername);
           navigationProvider.setAvatarId(avatarId);
           navigationProvider.setExperience(experience);
+          navigationProvider.setPackages(packages);
+          navigationProvider.setFriends(friends);
+          navigationProvider.setVisibility(visibility);
         } else {
           // Existing user
           navigationProvider.setUserId(userId);
           navigationProvider.setUsername(userData['username']);
           navigationProvider.setAvatarId(userData['avatarId'] ?? 0);
           navigationProvider.setExperience(userData['experience'] ?? 0);
+          navigationProvider.setPackages(userData['packages'] ?? List.filled(100, '0').join(','));
+          navigationProvider.setFriends(userData['friends'] ?? 0);
+          navigationProvider.setVisibility(userData['visibility'] ?? 0);
+
           print('User document already exists...');
         }
       }
