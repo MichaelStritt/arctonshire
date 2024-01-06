@@ -28,9 +28,18 @@ class AvatarSelectionPageState extends State<AvatarSelectionPage> {
   }
 
   Future<void> _updateAvatarId(int newAvatarId) async {
-    String? userId = Provider.of<NavigationProvider>(context, listen: false).userId;
+    // Capture the NavigationProvider reference before the async operation
+    final navigationProvider = Provider.of<NavigationProvider>(context, listen: false);
+
+    // Retrieve the userId from the captured NavigationProvider
+    String? userId = navigationProvider.userId;
+    
     if (userId != null) {
       await FirestoreService.updateAvatarId(userId, newAvatarId);
+
+      // Update the avatar ID in the captured NavigationProvider
+      navigationProvider.setAvatarId(newAvatarId);
+
       if (mounted) {
         Navigator.pop(context);
       }
