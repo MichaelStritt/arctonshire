@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:arctonshire/services/firestore_services.dart';
 import 'package:arctonshire/provider/navigation_provider.dart';
+import 'package:arctonshire/backgrounds/background_with_avatar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -132,152 +133,99 @@ class _HomePageState extends State<HomePage> {
     const double buttonPadding = 10; // Set the vertical padding between buttons here
     const double fontSize = 20; // Set your preferred font size here
 
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height,
-      decoration: const BoxDecoration(
-        color: Colors.black, // Set the background color to black
-        image: DecorationImage(
-          image: AssetImage("assets/interface/homePageBackground.png"),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: Stack(
-        children: [
-          // Buttons and other content
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center, // Center the buttons vertically
-            crossAxisAlignment: CrossAxisAlignment.center, // Center the buttons horizontally
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              // Add the three centered buttons here
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: buttonWidth,
-                      height: buttonHeight, // Set the button height
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Handle "New Game" button click
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[900], // Set the button background color to a really dark gray
-                          textStyle: const TextStyle(
-                            fontWeight: FontWeight.bold, // Make the font bold
-                            fontSize: fontSize, // Set the font size
-                            color: Colors.white, // Set the font color to perfect white
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10), // Adjust the corner radius here
-                          ),
+    return Stack(
+      children: [
+        // Use the BackgroundWithAvatar widget here
+        BackgroundWithAvatar(userId),
+        // Buttons and other content
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center, // Center the buttons vertically
+          crossAxisAlignment: CrossAxisAlignment.center, // Center the buttons horizontally
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            // Add the three centered buttons here
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: buttonWidth,
+                    height: buttonHeight, // Set the button height
+                    child: ElevatedButton(
+                      onPressed: () {
+                        var navigationProvider = Provider.of<NavigationProvider>(context, listen: false);
+                        navigationProvider.openUserLobbyPage(context); // Navigate to UserLobbyPage
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[900], // Set the button background color to a really dark gray
+                        textStyle: const TextStyle(
+                          fontWeight: FontWeight.bold, // Make the font bold
+                          fontSize: fontSize, // Set the font size
+                          color: Colors.white, // Set the font color to perfect white
                         ),
-                        child: const Text('Play'),
-                      ),
-                    ),
-                    const SizedBox(height: buttonPadding), // Add vertical padding between buttons
-                    SizedBox(
-                      width: buttonWidth,
-                      height: buttonHeight, // Set the button height
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Handle "Adventure" button click
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[900], // Set the button background color to a really dark gray
-                          textStyle: const TextStyle(
-                            fontWeight: FontWeight.bold, // Make the font bold
-                            fontSize: fontSize, // Set the font size
-                            color: Colors.white, // Set the font color to perfect white
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10), // Adjust the corner radius here
-                          ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10), // Adjust the corner radius here
                         ),
-                        child: const Text('Adventure'),
                       ),
+                      child: const Text('Play'),
                     ),
-                    const SizedBox(height: buttonPadding), // Add vertical padding between buttons
-                    SizedBox(
-                      width: buttonWidth,
-                      height: buttonHeight, // Set the button height
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Handle "About" button click
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[900], // Set the button background color to a really dark gray
-                          textStyle: const TextStyle(
-                            fontWeight: FontWeight.bold, // Make the font bold
-                            fontSize: fontSize, // Set the font size
-                            color: Colors.white, // Set the font color to perfect white
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10), // Adjust the corner radius here
-                          ),
+                  ),
+                  const SizedBox(height: buttonPadding), // Add vertical padding between buttons
+                  SizedBox(
+                    width: buttonWidth,
+                    height: buttonHeight, // Set the button height
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Handle "Adventure" button click
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[900], // Set the button background color to a really dark gray
+                        textStyle: const TextStyle(
+                          fontWeight: FontWeight.bold, // Make the font bold
+                          fontSize: fontSize, // Set the font size
+                          color: Colors.white, // Set the font color to perfect white
                         ),
-                        child: const Text('About'),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10), // Adjust the corner radius here
+                        ),
                       ),
+                      child: const Text('Adventure'),
                     ),
-                    const SizedBox(height: buttonPadding), // Add vertical padding between buttons
-                  ],
-                ),
-              ),
-
-              _buildSignOutButton(), // Display sign-out button
-            ],
-          ),
-
-          // Positioned avatar image at the top right corner
-          Positioned(
-            top: 0,
-            right: 0,
-            child: GestureDetector(
-              onTap: () {
-                var navigationProvider = Provider.of<NavigationProvider>(context, listen: false);
-                navigationProvider.openUserProfile(context); // Navigate to UserProfilePage
-              },
-              child: FutureBuilder<int?>(
-                future: FirestoreService.getAvatarId(userId),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    int? userAvatarId = snapshot.data;
-                    return userAvatarId != null
-                        ? Padding(
-                            padding: const EdgeInsets.only(top: 12.0, right: 12.0),
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: <Widget>[
-                                Image.asset(
-                                  'assets/avatars/avatar_$userAvatarId.webp',
-                                  height: 140,
-                                  width: 140,
-                                  fit: BoxFit.cover,
-                                ),
-                                Image.asset(
-                                  'assets/interface/avatarFrame.png',
-                                  height: 160,
-                                  width: 160,
-                                  fit: BoxFit.cover,
-                                ),
-                              ],
-                            ),
-                          )
-                        : const SizedBox();
-                  }
-                },
+                  ),
+                  const SizedBox(height: buttonPadding), // Add vertical padding between buttons
+                  SizedBox(
+                    width: buttonWidth,
+                    height: buttonHeight, // Set the button height
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Handle "About" button click
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[900], // Set the button background color to a really dark gray
+                        textStyle: const TextStyle(
+                          fontWeight: FontWeight.bold, // Make the font bold
+                          fontSize: fontSize, // Set the font size
+                          color: Colors.white, // Set the font color to perfect white
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10), // Adjust the corner radius here
+                        ),
+                      ),
+                      child: const Text('About'),
+                    ),
+                  ),
+                  const SizedBox(height: buttonPadding), // Add vertical padding between buttons
+                ],
               ),
             ),
-          ),
-        ],
-      ),
+
+            _buildSignOutButton(), // Display sign-out button
+          ],
+        ),
+      ],
     );
   }
+
 
 
   Widget _buildSignOutButton() {
@@ -366,7 +314,5 @@ class _HomePageState extends State<HomePage> {
       });
     }
   }
-
-
 
 }

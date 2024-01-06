@@ -2,69 +2,51 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:arctonshire/provider/navigation_provider.dart';
 import 'package:arctonshire/services/firestore_services.dart';
+import 'package:arctonshire/backgrounds/background_with_avatar.dart';
 
-class UserProfilePage extends StatefulWidget {
-  const UserProfilePage({super.key});
-
-  @override
-  UserProfilePageState createState() => UserProfilePageState();
-}
-
-class UserProfilePageState extends State<UserProfilePage> {
-  late Future<Map<String, dynamic>?> _userDataFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    String? userId = Provider.of<NavigationProvider>(context, listen: false).userId;
-
-    if (userId != null) {
-      _userDataFuture = FirestoreService.getUserData(userId);
-    } else {
-      // Handle the case when userId is null.
-      print("Error: userId is null");
-    }
-  }
+class UserProfilePage extends StatelessWidget {
+  const UserProfilePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Access userId here
     String? userId = Provider.of<NavigationProvider>(context, listen: false).userId;
 
     return Scaffold(
       body: Stack(
         children: [
-          // Main content of the page
-          FutureBuilder<Map<String, dynamic>?>(
-            future: _userDataFuture,
-            builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>?> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
+          // Use the BackgroundWithAvatar widget here
+          BackgroundWithAvatar(userId!),
 
-              if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              }
+          // Centered content on top of the background
+          Center(
+            child: FutureBuilder<Map<String, dynamic>?>(
+              future: FirestoreService.getUserData(userId),
+              builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>?> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                }
 
-              if (!snapshot.hasData || snapshot.data == null) {
-                return const Center(child: Text('No user data available'));
-              }
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
 
-              var userData = snapshot.data!;
-              String username = userData['username'] ?? 'Username';
-              int avatarId = userData['avatarId'] ?? 0;
-              int experience = userData['experience'] ?? 0;
-              String packages = userData['packages'] ?? List.filled(100, '0').join(',');
+                if (!snapshot.hasData || snapshot.data == null) {
+                  return const Text('No user data available');
+                }
 
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
+                var userData = snapshot.data!;
+                String username = userData['username'] ?? 'Username';
+                int avatarId = userData['avatarId'] ?? 0;
+                int experience = userData['experience'] ?? 0;
+                //String packages = userData['packages'] ?? List.filled(100, '0').join(',');
+
+                return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text('Username: $username'),
                     Text('Avatar ID: $avatarId'),
                     Text('Experience: $experience'),
-                    Text('Packages: $packages'),
+                    // Text('Packages: $packages'),
                     // Add the "Change Avatar" button
                     ElevatedButton(
                       onPressed: () {
@@ -75,10 +57,11 @@ class UserProfilePageState extends State<UserProfilePage> {
                     ),
                     // Add more widgets as needed to display user data
                   ],
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
+
           // Add a row for Increase and Decrease buttons
           Positioned(
             bottom: 16, // Adjust the position as needed
@@ -87,16 +70,17 @@ class UserProfilePageState extends State<UserProfilePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildDecreaseButton(userId!), // Use the null-aware operator to assert non-null
+                _buildDecreaseButton(userId), // Use the null-aware operator to assert non-null
                 const SizedBox(width: 20), // Add some spacing between the buttons
-                _buildIncreaseButton(userId!), // Use the null-aware operator to assert non-null
+                _buildIncreaseButton(userId), // Use the null-aware operator to assert non-null
               ],
             ),
           ),
+
           // Close button
           Positioned(
             top: MediaQuery.of(context).padding.top, // Respect the status bar height
-            right: 0,
+            left: 0,
             child: IconButton(
               icon: const Icon(Icons.close, size: 30.0),
               onPressed: () {
@@ -119,7 +103,6 @@ class UserProfilePageState extends State<UserProfilePage> {
     );
   }
 
-
   Widget _buildDecreaseButton(String userId) {
     return ElevatedButton(
       onPressed: () async {
@@ -129,6 +112,4 @@ class UserProfilePageState extends State<UserProfilePage> {
       child: const Text("-EXP"),
     );
   }
-
 }
-

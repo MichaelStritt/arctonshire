@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:arctonshire/pages/avatar_selection.dart';
 import 'package:arctonshire/pages/user_profile.dart';
+import 'package:arctonshire/pages/user_lobby.dart';
 
 class NavigationProvider extends ChangeNotifier {
   late BuildContext context;
@@ -31,6 +32,15 @@ class NavigationProvider extends ChangeNotifier {
       context,
       MaterialPageRoute(
         builder: (context) => UserProfilePage(),
+      ),
+    );
+  }
+
+  void openUserLobbyPage(BuildContext context) async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserLobbyPage(),
       ),
     );
   }
