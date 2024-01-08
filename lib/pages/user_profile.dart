@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:arctonshire/classes/app_user.dart';
 import 'package:arctonshire/provider/navigation_provider.dart';
 import 'package:arctonshire/services/firestore_services.dart';
-import 'package:arctonshire/backgrounds/background_with_avatar.dart';
+import 'package:arctonshire/backgrounds/background_user_profile.dart';
 
 class UserProfilePage extends StatelessWidget {
   const UserProfilePage({Key? key}) : super(key: key);
@@ -26,7 +26,7 @@ class UserProfilePage extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          BackgroundWithAvatar(
+          BackgroundUserProfile(
             currentUser.userId, // Use currentUser's userId
             onAvatarTap: () => navigationProvider.openAvatarSelection(context),
           ),

@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:arctonshire/classes/app_user.dart';
 import 'package:arctonshire/provider/navigation_provider.dart';
 import 'package:arctonshire/services/firestore_services.dart';
-import 'package:arctonshire/backgrounds/background_with_avatar.dart';
+import 'package:arctonshire/backgrounds/background_user_lobby.dart';
 
 class UserLobby extends StatefulWidget {
   @override
@@ -56,9 +56,18 @@ class _UserLobbyState extends State<UserLobby> {
     return Scaffold(
       body: Stack(
         children: <Widget>[
-          BackgroundWithAvatar(
+          BackgroundUserLobby(
             navigationProvider.currentUser?.userId ?? '', // Use the currentUser's userId
             onAvatarTap: () => navigationProvider.openUserProfile(context),
+          ),
+
+          // For testing
+          ElevatedButton(
+            onPressed: () {
+              var navigationProvider = Provider.of<NavigationProvider>(context, listen: false);
+              navigationProvider.openPlayerBoardPage(context); // Navigate to PlayerBoardPage
+            },
+            child: const Text('PlayerBoard'), // Add the child widget here
           ),
 
           /*

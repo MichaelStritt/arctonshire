@@ -3,6 +3,7 @@ import 'package:arctonshire/classes/app_user.dart';
 import 'package:arctonshire/pages/avatar_selection.dart';
 import 'package:arctonshire/pages/user_profile.dart';
 import 'package:arctonshire/pages/user_lobby.dart';
+import 'package:arctonshire/pages/player_board.dart';
 
 class NavigationProvider extends ChangeNotifier {
   late BuildContext context;
@@ -46,6 +47,15 @@ class NavigationProvider extends ChangeNotifier {
       context,
       MaterialPageRoute(
         builder: (context) => UserLobby(),
+      ),
+    );
+  }
+
+  void openPlayerBoardPage(BuildContext context) async {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PlayerBoard(),
       ),
     );
   }
